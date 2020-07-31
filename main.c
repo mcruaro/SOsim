@@ -83,7 +83,7 @@ int main() {
 			printf("SC|");
 		}
 		
-		sleep(0,5);
+		sleep(1);
 	}
 	
 	return 0;
