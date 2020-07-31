@@ -31,6 +31,14 @@ void initialize(){
 	}
 	
 	printf("System Initialized\n\n");
+	
+	for(int i=0; i<30; i++){
+		if(i<10)
+		printf(" %d|",i);
+		else
+		printf("%d|",i);
+	}
+	printf("\n");
 }
 
 
