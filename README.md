@@ -1,2 +1,2 @@
 # SOsim
-A simple C code that simulate the behavior of process scheduling in a operating system
+Contains several source code that simulate a SO. Used in the bachelor course of Operating Systems.
