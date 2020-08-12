@@ -14,7 +14,6 @@ struct TCB {
 	int exec_time;
 };
 
-
 int t;
 int current;
 int time_slice;
