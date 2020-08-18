@@ -3,10 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package sosim;
+package sosim80;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 enum ProcStatus {
     WAITING,
@@ -18,17 +16,21 @@ class TCB {
     int ID;
     ProcStatus status;
     int exec_time;
+
+    //80_wait
+    int waiting_time;
 };
 
 /**
  *
  * @author Marcelo
  */
-public class SOsim {
+public class SOsim80 {
 
     //Constantes
-    static final int MAX_TIME_SLICE = 5;
-    static final int N = 3;
+      static final int N = 2;
+    static final int MAX_TIME_SLICE = 10;
+    static final int MAX_EXEC_TIME = 10;
 
     static int t;
     static int current;
@@ -48,6 +50,9 @@ public class SOsim {
             p[i].ID = i;
             p[i].status = ProcStatus.READY;
             p[i].exec_time = 0;
+
+            //80_wait
+		    p[i].waiting_time = 0;
         }
         
         System.out.print("System Initialized\n\n");
@@ -82,6 +87,22 @@ public class SOsim {
         return -1;
     }
 
+    //80_wait
+    static void simm_IO_time(){
+        for(int i=0; i<N; i++){
+            if (p[i].status == ProcStatus.WAITING){
+                
+                if (p[i].waiting_time + 1 + p[i].exec_time >= MAX_EXEC_TIME){
+                    p[i].status = ProcStatus.READY;
+                    p[i].exec_time = 0;
+                }
+                
+                p[i].waiting_time++;
+            }
+        
+        }
+    }
+
     public static void main(String[] args) {
         initialize();
        
@@ -93,6 +114,11 @@ public class SOsim {
                     p[current].status = ProcStatus.READY;
                     p[current].exec_time = 0;
                     current = -1;
+                //80_wait
+                } else if (p[current].exec_time >= (MAX_EXEC_TIME*0.2)){
+                    p[current].status = ProcStatus.WAITING;
+                    p[current].waiting_time = 0;	
+                    current = -1;
                 } else {
                     p[current].exec_time++;
                     System.out.print("P" + current+"|");
@@ -100,6 +126,9 @@ public class SOsim {
 
                 time_slice--;
             }
+
+            //80_wait
+		    simm_IO_time();
 
             //Schedules a new task to run into CPU
             if (current == -1) {
