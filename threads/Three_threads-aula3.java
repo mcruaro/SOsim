@@ -35,13 +35,13 @@ public class MonoMulti {
     //DESCOMENTE OU COMENTE OS BLOCOS ABAIXO PARA REPRESENTAR O COMPORTAMENTO DESEJADO
 
     //-------------------------------------------------------------- MONOTHREAD
-    public static void sendToNet(){
-        save_working = true;
+    /*public static void sendToNet(){
+        sent_working = true;
         try {
-            System.out.println("Acessing disk...");
+            System.out.println("Connecting to Server...");
             Thread.sleep(1000);
-            save_working = false;
-            System.out.println("Save completed!\n");
+            sent_working = false;
+            System.out.println("Connection completed!\n");
         } catch (Exception ex) {
         }
     }
@@ -55,13 +55,13 @@ public class MonoMulti {
             System.out.println("Save completed!\n");
         } catch (Exception ex) {
         }
-    }
+    }*/
     //-------------------------------------------------------------- MONOTHREAD
     
 
     
     //-------------------------------------------------------------- MULTITHREAD
-    /*public static void saveToDisk() {
+    public static void saveToDisk() {
         save_working = true;
         
         new Thread("Thread 1: SaveToDisk") {
@@ -98,7 +98,7 @@ public class MonoMulti {
             }
         }.start();
 
-    }*/
+    }
     //-------------------------------------------------------------- MULTITHREAD
     
     //The Java volatile keyword guarantees visibility of changes to variables across threads. See more in: http://tutorials.jenkov.com/java-concurrency/volatile.html
