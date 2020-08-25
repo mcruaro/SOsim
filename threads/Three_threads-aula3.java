@@ -101,13 +101,13 @@ public class MonoMulti {
     }*/
     //-------------------------------------------------------------- MULTITHREAD
     
-    
+    //The Java volatile keyword guarantees visibility of changes to variables across threads. See more in: http://tutorials.jenkov.com/java-concurrency/volatile.html
     volatile static boolean save_working = false;
     volatile static boolean sent_working = false;
     
     public static void main(String[] args) {
-
-        int rodada = 0;
+        
+         int rodadas = 0;
         
          while (rodadas < 3) {
         
