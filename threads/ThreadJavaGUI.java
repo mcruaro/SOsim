@@ -33,7 +33,7 @@ public class ThreadJava {
 class Processing extends Thread {
 
     //Variavel contadora do estado do processamento
-    static int p;
+    int p;
     
     @Override
     public void run() {
@@ -54,7 +54,7 @@ class Processing extends Thread {
 
 class LoadingGUI extends Thread {
 
-    static Processing proc_status;
+    Processing proc_status;
 
     //Construtor, inicializa a objeto proc_status
     public LoadingGUI(Processing proc_st) {
