@@ -6,27 +6,26 @@
 package semaforo_prod_cons;
 
 /**
- *
  * @author Marcelo
  */
 public class Semaforo {
     
-    private int S;
-    SleepWakeup process;
+    private volatile int S;
 
     public Semaforo(int init_S) {
-        S = init_S;
+        this.S = init_S;
     }
     
-    public synchronized void down(SleepWakeup process){
-        if (S <= 0){
+    public void down(SleepWakeup process){
+        if (S == 0){
             process.sleep();
         }
         S = S - 1;
     }
     
-    public synchronized void up(SleepWakeup process){
+    public void up(SleepWakeup process){
         S = S + 1;
+        //System.out.println(name+" of "+process.getName()+" call wakeup");
         process.wakeup();
     }
     

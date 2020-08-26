@@ -9,9 +9,8 @@ package semaforo_prod_cons;
  *
  * @author Marcelo
  */
-public class Consumer extends Thread implements SleepWakeup{
+public class Consumer extends SleepWakeup{
 
-    boolean sleeping;
     Producer producer;
     
     Buffer buffer;
@@ -35,9 +34,11 @@ public class Consumer extends Thread implements SleepWakeup{
     public void run(){
         int item;
                 
-        while(true){
+        for (int i = 0; i < 10; i++) {
                 
+            System.out.println("Consumer DOWN full");
             full.down(this);
+            System.out.println("Consumer DOWN reserva");
             reserva.down(this);
 
             System.out.println("Consumer entrou na regiao critica******");
@@ -45,27 +46,14 @@ public class Consumer extends Thread implements SleepWakeup{
             item = buffer.remove_item();
             
             System.out.println("Consumer saiu na regiao critica********");
-
             
+            System.out.println("Consumer UP reserva");
             reserva.up(producer);
+            System.out.println("Consumer UP empty");
             empty.up(producer);
             
+            //do_something();
+            
         }
     }
-    
-     @Override
-    public void sleep() {
-        sleeping = true;
-        System.out.println("Consumer indo dormir...");
-        while(sleeping);
-    }
-
-    @Override
-    public void wakeup() {
-        if(sleeping){
-            System.out.println("Consumer acordado");
-            sleeping = false;
-        }
-    }
-    
 }

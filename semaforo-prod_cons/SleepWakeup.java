@@ -9,9 +9,32 @@ package semaforo_prod_cons;
  *
  * @author Marcelo
  */
-public interface SleepWakeup {
-    
-    public void sleep();
-    public void wakeup();
-    
+public class SleepWakeup extends Thread {
+
+    private volatile boolean sleeping;
+
+    public void sleep() {
+        sleeping = true;
+        System.out.println(this.getName() + " indo dormir...");
+        while (sleeping);
+    }
+
+    public void wakeup() {
+        if (sleeping) {
+            System.out.println(this.getName() + " acordado");
+            sleeping = false;
+        }
+    }
+
+    public void do_something() {
+        for (int i = 0; i < 2; i++) {
+            try {
+                Thread.sleep(1000);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+        }
+    }
+
 }

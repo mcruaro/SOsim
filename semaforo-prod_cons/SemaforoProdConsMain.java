@@ -9,9 +9,9 @@ package semaforo_prod_cons;
  *
  * @author Marcelo
  */
-public class Semaforo_prod_cons {
+public class SemaforoProdConsMain {
 
-    static final int N = 1; //numero de lugares no buffer
+    static final int N = 3; //numero de lugares no buffer
     
     /**
      * @param args the command line arguments
