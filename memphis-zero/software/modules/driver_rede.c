@@ -14,7 +14,7 @@
  * This module is used by both manager and slave kernel
  */
 
-#include "packet.h"
+#include "driver_rede.h"
 #include "../include/plasma.h"
 
 ServiceHeaderSlot sh_slot1, sh_slot2;	//!<Slots to prevent memory writing while is sending a packet

@@ -20,7 +20,7 @@
 #include "utils.h"
 #include "resource_manager.h"
 #include "processors.h"
-#include "packet.h"
+#include "driver_rede.h"
 
 #define RECLUSTERING_DEBUG	0		//!<When enable compile the puts in this file
 

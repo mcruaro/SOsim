@@ -18,7 +18,7 @@
 
 #include "../../include/kernel_pkg.h"
 #include "applications.h"
-#include "packet.h"
+#include "driver_rede.h"
 
 typedef struct {
 	Task * task;				//!<Task pointer of the task under reclustering

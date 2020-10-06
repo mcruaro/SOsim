@@ -23,7 +23,7 @@
 #include "../../modules/utils.h"
 #include "../../include/plasma.h"
 #include "../../include/services.h"
-#include "../../modules/packet.h"
+#include "../../modules/driver_rede.h"
 #include "../../modules/resource_manager.h"
 #include "../../modules/reclustering.h"
 #include "../../modules/applications.h"
