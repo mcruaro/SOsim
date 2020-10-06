@@ -56,7 +56,7 @@ int handle_packet(volatile ServiceHeader * p) {
 	}
 }
 
-/*Chamada quando uma interrupcao ocorre*/
+/*Funcao de tratamento de interrupcao (interrupt_handler). Chamada quando uma interrupcao ocorre*/
 void OS_InterruptServiceRoutine(unsigned int status) {
 
 	volatile ServiceHeader p;
