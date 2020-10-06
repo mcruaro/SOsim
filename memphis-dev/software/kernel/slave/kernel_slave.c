@@ -15,51 +15,12 @@ unsigned int	my_cpu_address;
 unsigned int 	cluster_master_address;
 
 
+/*Implementa chamadas de sistemas*/
 int Syscall(unsigned int service, unsigned int arg0, unsigned int arg1, unsigned int arg2) {
 
 	
 	schedule_after_syscall = 0;
 
-	switch (service) {
-
-		case EXIT:
-
-			schedule_after_syscall = 1;
-			
-			puts("Task id: "); puts(itoa(current->id)); putsv(" terminated at ", MemoryRead(TICK_COUNTER));
-
-			
-		return 1;
-
-		case WRITEPIPE:
-
-			
-		return 1;
-
-		case READPIPE:
-
-
-			return 0;
-
-		case GETTICK:
-
-			return MemoryRead(TICK_COUNTER);
-
-		break;
-
-		case ECHO:
-
-			/*puts("$$$_");
-			puts(itoa(my_cpu_address>>8));puts("x");puts(itoa(my_cpu_address&0xFF)); puts("_");
-			puts(itoa(current->id >> 8)); puts("_");
-			puts(itoa(current->id & 0xFF)); puts("_");
-			puts((char *)((current->offset) | (unsigned int) arg0));
-			puts("\n");*/
-
-		break;
-
-
-	}
 
 	return 0;
 }
@@ -67,8 +28,6 @@ int Syscall(unsigned int service, unsigned int arg0, unsigned int arg1, unsigned
 
 void Scheduler() {
 
-
-	OS_InterruptMaskSet(IRQ_SCHEDULER);
 
 }
 
@@ -97,12 +56,7 @@ int handle_packet(volatile ServiceHeader * p) {
 	}
 }
 
-/** Function called by assembly (into interruption handler). Implements the routine to handle interruption in Memphis
- * This function must implement a important rule: it cannot send a packet when the DMNI is already send a packet.
- * The interruption triggers according to the DMNI status, and the if-else statements inside this function ensure this
- * behavior.
- * \param status Status of the interruption. Signal the interruption type
- */
+/*Chamada quando uma interrupcao ocorre*/
 void OS_InterruptServiceRoutine(unsigned int status) {
 
 	volatile ServiceHeader p;
@@ -134,18 +88,6 @@ void OS_InterruptServiceRoutine(unsigned int status) {
 
 
 
-/** Set a interruption mask
- * \param Mask Interruption mask set
- */
-unsigned int OS_InterruptMaskSet(unsigned int Mask) {
-
-    unsigned int mask;
-
-    mask = MemoryRead(IRQ_MASK) | Mask;
-    MemoryWrite(IRQ_MASK, mask);
-
-    return mask;
-}
 
 /** Idle function
  */
@@ -161,8 +103,8 @@ int main(){
 
 	puts("Runnign kernel slave\n");
 
-	/*enables timeslice counter and wrapper interrupts*/
-	OS_InterruptMaskSet(IRQ_SCHEDULER | IRQ_NOC);
+	/*Configura o tipo de interrupcao para ESCALONADOR E NOC*/
+	MemoryWrite(IRQ_MASK, (IRQ_SCHEDULER | IRQ_NOC));
 
 	/*runs the scheduled task -- this function also set interruption to true*/
 	//ASM_RunScheduledTask(current);
