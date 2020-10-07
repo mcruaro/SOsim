@@ -11,8 +11,9 @@
 
 unsigned int 	schedule_after_syscall;		//!< Signals the syscall function (assembly implemented) to call the scheduler after the syscall
 TCB *			current;	
+TCB 			idle_tcb;
 unsigned int	my_cpu_address;
-unsigned int 	cluster_master_address;
+unsigned int 	master_address;
 
 
 /*Implementa chamadas de sistemas*/
@@ -39,9 +40,9 @@ int handle_packet(volatile ServiceHeader * p) {
 
 		case INITIALIZE_SLAVE:
 
-			cluster_master_address = p->source_PE;
+			master_address = p->source_PE;
 
-			putsv("Slave initialized by cluster address: ", cluster_master_address);
+			putsv("Slave initialized by master at address: ", master_address);
 
 		break;
 
@@ -62,10 +63,10 @@ void OS_InterruptServiceRoutine(unsigned int status) {
 	volatile ServiceHeader p;
 	unsigned int call_scheduler = 0;
 	
-	//***** Check if interruption comes from NoC
+	//***** Check if interruption comes from interface de rede intra chip (NoC)
 	if ( status & IRQ_NOC ){
 
-		puts("Handle packet\n");
+		//Pacote eh lido da rede (driver de rede) e o cabecalho eh gravado em p (ServiceHeader)
 		read_packet((ServiceHeader *)&p);
 
 		call_scheduler = handle_packet(&p);
@@ -89,9 +90,11 @@ void OS_InterruptServiceRoutine(unsigned int status) {
 
 
 
-/** Idle function
+/** Idle implementa o comportamento de IDLE do kernel, neste caso, chama um gatilho em hardware
+ * para o processador ir dorimir (MemoryWrite(CLOCK_HOLD, 1))
  */
 void OS_Idle() {
+	puts("Idle running...\n");
 	for (;;){
 		MemoryWrite(CLOCK_HOLD, 1);
 	}
@@ -99,21 +102,27 @@ void OS_Idle() {
 
 int main(){
 
+	//Desabilita interrupcoes
 	ASM_SetInterruptEnable(FALSE);
 
-	puts("Runnign kernel slave\n");
+	//Inicializando a tarefa Idle
+	idle_tcb.pc = (unsigned int) &OS_Idle;
+	idle_tcb.id = 0;
+	idle_tcb.offset = 0;
+	
+	current = &idle_tcb; //A TCB current recebe a TCB idle 
+	
+	//Le o endereco atual do core/CPU
+	my_cpu_address = MemoryRead(NI_CONFIG);
 
-	/*Configura o tipo de interrupcao para ESCALONADOR E NOC*/
+	puts("Runnign kernel slave\n");
+	puts("My address is: "); puts(itoh(my_cpu_address)); puts("\n");
+
+	/*Configura o tipo de interrupcao: ESCALONADOR E NOC*/
 	MemoryWrite(IRQ_MASK, (IRQ_SCHEDULER | IRQ_NOC));
 
 	/*runs the scheduled task -- this function also set interruption to true*/
-	//ASM_RunScheduledTask(current);
-
-	ASM_SetInterruptEnable(TRUE);
-
-	while(1){
-		puts("idle...\n");
-	}
+	ASM_RunScheduledTask(current);
 
 	return 0;
 }

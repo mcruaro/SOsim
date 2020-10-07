@@ -4,10 +4,16 @@
 #define __KERNEL_SLAVE_H__
 
 
+//Estrutura Task Control Block
 typedef struct {
 
-	unsigned int id;
-    unsigned int offset;
+    //###### Variaveis utililizadas na troca de contexto ######
+    unsigned int reg[30]; //Armazena o conteudo dos registradores quando ha troca de contexto
+    unsigned int pc; //Armazena o conteudo do program counter (PC) - guarda a linha atual de execucao
+    unsigned int offset; //Armazena o endereco inicial da pagina de memoria 
+   
+    //####Outras variaveis
+    unsigned int id; //Cada tarefa/thread vai ter um ID unico
 
 }TCB;
 
