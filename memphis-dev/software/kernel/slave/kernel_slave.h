@@ -3,7 +3,7 @@
 #ifndef __KERNEL_SLAVE_H__
 #define __KERNEL_SLAVE_H__
 
-
+#include "../../../include/kernel_pkg.h"
 //Estrutura Task Control Block
 typedef struct {
 
@@ -14,8 +14,39 @@ typedef struct {
    
     //####Outras variaveis
     unsigned int id; //Cada tarefa/thread vai ter um ID unico
+    
+    unsigned int status;
 
 }TCB;
+
+enum scheduling_status {READY, WAITING, RUNNING};
+
+TCB tcbs[MAX_LOCAL_TASKS];
+
+void init_tcbs(){
+
+    for(int i=0; i<MAX_LOCAL_TASKS; i++){
+        tcbs[i].pc = 0;
+        tcbs[i].id = -1; //LIVRE
+        tcbs[i].offset = PAGE_SIZE * (i + 1);
+
+        tcbs[i].status = READY;
+    }
+}
+
+TCB * search_free_TCB() {
+
+    for(int i=0; i<MAX_LOCAL_TASKS; i++){
+		if(tcbs[i].id == -1){
+			return &tcbs[i];
+		}
+	}
+
+    puts("ERROR - no FREE TCB\n");
+    while(1);
+    return 0;
+}
+
 
 
 
