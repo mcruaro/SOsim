@@ -1,4 +1,10 @@
 
+
+#ifndef TASK_LOCATION_H_
+#define TASK_LOCATION_H_
+
+#include "../../include/kernel_pkg.h"
+
 #define MAX_TASK_LOCATION 5
 
 
@@ -57,7 +63,7 @@ void add_task_location(int task_ID, int proc){
 		}
 	}
 
-	puts("ERROR - no FREE Task location\n");
+	//puts("ERROR - no FREE Task location\n");
 	while(1);
 }
 
@@ -83,7 +89,7 @@ int remove_task_location(int task_id){
 		}
 	}
 
-	puts("ERROR - task not found to remove\n");
+	//puts("ERROR - task not found to remove\n");
 	while(1);
 	return -1;
 }
@@ -101,3 +107,6 @@ void clear_app_tasks_locations(int app_ID){
 		}
 	}
 }
+
+
+#endif 

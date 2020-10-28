@@ -48,6 +48,18 @@ TCB * search_free_TCB() {
 }
 
 
+TCB * search_TCB(int id) {
+
+    for(int i=0; i<MAX_LOCAL_TASKS; i++){
+		if(tcbs[i].id == id){
+			return &tcbs[i];
+		}
+	}
+    
+    return 0;
+}
+
+
 
 
 extern unsigned int ASM_SetInterruptEnable(unsigned int);
