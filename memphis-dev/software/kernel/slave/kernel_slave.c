@@ -75,7 +75,8 @@ int Syscall(unsigned int service, unsigned int arg0, unsigned int arg1, unsigned
 	int consumer_task, producer_task, producer_PE, consumer_PE;
 	int appID;
 	MessageRequest * msg_req_ptr;
-	Message *msg_read;
+	Message *msg_read, *msg_consumer, *msg_producer;
+	TCB * tcb_consumer, * tcb_producer;
 	
 	schedule_after_syscall = 0;
 
@@ -110,12 +111,36 @@ int Syscall(unsigned int service, unsigned int arg0, unsigned int arg1, unsigned
 
 				consumer_PE = get_task_location(consumer_task);
 
+				//Guarda a mensagem da produtora
 				msg_read = (Message *)((current->offset) | arg0);
 
-				send_message_delivery(producer_task, consumer_task, consumer_PE, msg_read);
+				//Prod e Cons estao em Procs remotos
+				if (consumer_PE != my_cpu_address){
+
+					send_message_delivery(producer_task, consumer_task, consumer_PE, msg_read);
+				
+				} else {
+					//Copiar a msg da produtora para consumidora
+					tcb_consumer = search_TCB(consumer_task);
+
+					msg_consumer = (Message*)((tcb_consumer->offset) | ((unsigned int)tcb_consumer->reg[3]));
+
+					msg_consumer->msg_size = msg_read->msg_size;
+
+					for(int i=0; i<msg_read->msg_size; i++){
+						msg_consumer->data[i] = msg_read->data[i];
+					}
+
+					//DMNI_read_data((unsigned int)msg_read->data, msg_read->msg_size);
+
+					tcb_consumer->status = READY;
+
+					schedule_after_syscall = 1;
+
+				}
 			//3. Se nao, deixar a produra em WAITING, aguardando sua mensagem ser requisitada
 			} else {
-				puts("Produra entroi em WAITING\n");
+				puts("Produra entrou em WAITING\n");
 				current->status = WAITING;
 				schedule_after_syscall = 1;
 			}
@@ -132,18 +157,47 @@ int Syscall(unsigned int service, unsigned int arg0, unsigned int arg1, unsigned
 
 			producer_PE = get_task_location(producer_task);
 
-			putsv("producer_task: ", producer_task);
-			putsv("consumer_task: ", consumer_task);
-			puts("producer_PE: "); puts(itoh(producer_PE)); puts("\n");
+			//putsv("producer_task: ", producer_task);
+			//putsv("consumer_task: ", consumer_task);
+			//puts("producer_PE: "); puts(itoh(producer_PE)); puts("\n");
 
-			send_message_request(producer_task, consumer_task, producer_PE);
+			if (producer_PE != my_cpu_address){
+
+				send_message_request(producer_task, consumer_task, producer_PE);
+			
+			} else {
+
+				//Testar se a produtora esta em waiting
+				tcb_producer = search_TCB(producer_task);
+
+				if (tcb_producer->status == WAITING){
+				//Se prod estiver WAITING, significa que ela ja tem algo pra enviar
+					//Faco um FOR que copia a msg da prod pra cons
+					
+					msg_consumer = (Message *)((current->offset) | arg0);
+					msg_producer = (Message*)((tcb_producer->offset) | ((unsigned int)tcb_producer->reg[3]));
+					
+					msg_consumer->msg_size = msg_producer->msg_size;
+					for(int i=0; i<msg_producer->msg_size; i++){
+						msg_consumer->data[i] = msg_producer->data[i];
+					}
+					//Liberar a produtara = READY
+					tcb_producer->status = READY;
+
+					//Cuidar pra nao deixar em WAITING
+					return 0;
+					
+				} else {
+				//Se prod nao estiver WAITING, significa que preciso gravar a requisicao na tabela de request
+				   //Deixar a consumidora em WAITING
+				   insert_message_request(producer_task, consumer_task);
+				}			
+			}
 
 			//2. Deixar a tarefa atual (consumidora) em WAITING
 			current->status = WAITING;
 			schedule_after_syscall = 1;
 			
-			//3. (nao eh impletado aqui) o kernel, ao recebe o MESSAGE_DELIVERU da produra, libera a consumidora.
-
 			break;
 		
 		default:
@@ -170,8 +224,9 @@ int handle_packet(volatile ServiceHeader * p) {
 
 		case MESSAGE_REQUEST:
 
-			putsv("Produra: ", p->producer_task);
-			putsv("Consumidora: ", p->consumer_task);
+			puts("Message Request recebido\n");
+			//putsv("Produra: ", p->producer_task);
+			//putsv("Consumidora: ", p->consumer_task);
 
 			tcb_ptr = search_TCB(p->producer_task);
 
@@ -183,9 +238,9 @@ int handle_packet(volatile ServiceHeader * p) {
 				//Pega o pointeiro da mensagem da produtora
 				msg_read = (Message*)((tcb_ptr->offset) | ((unsigned int)tcb_ptr->reg[3]));
 
-				puts("Mensagem encontrada\n");
-				puts("PE da Consumidora: "); puts(itoh(p->source_PE)); puts("\n");
-				putsv("Tamanho da mensagem: ", msg_read->msg_size);
+				//puts("Mensagem encontrada\n");
+				//puts("PE da Consumidora: "); puts(itoh(p->source_PE)); puts("\n");
+				//putsv("Tamanho da mensagem: ", msg_read->msg_size);
 
 				send_message_delivery(p->producer_task, p->consumer_task, p->source_PE, msg_read);
 
@@ -201,6 +256,8 @@ int handle_packet(volatile ServiceHeader * p) {
 		break;
 
 		case MESSAGE_DELIVERY:
+
+			puts("Message Delivery recebido\n");
 
 			tcb_ptr = search_TCB(p->consumer_task);
 
@@ -292,8 +349,8 @@ void Scheduler() {
 		//Procura a proxima tarefa valida cujo status seja READY
 		if (tcbs[next_t].id != -1 && tcbs[next_t].status == READY){
 			current = &tcbs[next_t];
-			putsv("Escalonou tarefa: ", tcbs[next_t].id);
-			putsv("Tempo: ", MemoryRead(TICK_COUNTER));
+			//putsv("Escalonou tarefa: ", tcbs[next_t].id);
+			//putsv("Tempo: ", MemoryRead(TICK_COUNTER));
 			next_t++;
 			MemoryWrite(TIME_SLICE, 16384);//10000=0,16ms  100000=1ms (1s == 1000ms)
 			MemoryWrite(SCHEDULING_REPORT, current->id);
@@ -317,7 +374,7 @@ void OS_InterruptServiceRoutine(unsigned int status) {
 
 	MemoryWrite(SCHEDULING_REPORT, INTERRUPTION);
 
-	puts("\nNew interruption\n");
+	//puts("\nNew interruption\n");
 	
 	//***** Check if interruption comes from interface de rede intra chip (NoC)
 	if ( status & IRQ_NOC ){

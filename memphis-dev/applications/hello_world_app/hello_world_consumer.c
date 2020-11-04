@@ -10,7 +10,8 @@ int main()
 	for(int i=0; i<1000; i++){
 		print_string("Executando");
 		print_integer(i);
-		print_string("Mensagem sera enviada");
+		//print_string("Mensagem sera enviada");
+		
 		receive(&msg, hello_world_producer);
 	}
 

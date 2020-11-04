@@ -15,6 +15,7 @@ int main()
 	for(int i=0; i<1000; i++){
 		print_string("Executando");
 		print_integer(i);
+		
 		send(&msg, hello_world_consumer);
 	}
 
